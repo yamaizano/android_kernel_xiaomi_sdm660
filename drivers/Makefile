@@ -35,7 +35,6 @@ obj-$(CONFIG_SFI)		+= sfi/
 obj-$(CONFIG_PNP)		+= pnp/
 obj-y				+= amba/
 
-obj-y				+= clk/
 # Many drivers will want to use DMA so this has to be made available
 # really early.
 obj-$(CONFIG_DMADEVICES)	+= dma/
@@ -115,6 +114,8 @@ obj-$(CONFIG_SERIO)		+= input/serio/
 obj-$(CONFIG_GAMEPORT)		+= input/gameport/
 obj-$(CONFIG_INPUT)		+= input/
 obj-$(CONFIG_RTC_LIB)		+= rtc/
+#common clk code
+obj-y				+= clk/
 obj-y				+= i2c/ i3c/ media/
 obj-$(CONFIG_PPS)		+= pps/
 obj-y				+= ptp/
