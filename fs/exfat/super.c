@@ -3387,6 +3387,7 @@ enum {
 	Opt_err_ro,
 	Opt_err,
 	Opt_discard,
+	Opt_nodiscard,
 	Opt_delayed_meta,
 	Opt_nodelayed_meta,
 };
@@ -3408,9 +3409,8 @@ static const match_table_t exfat_tokens = {
 	{Opt_err_cont, "errors=continue"},
 	{Opt_err_panic, "errors=panic"},
 	{Opt_err_ro, "errors=remount-ro"},
-	{Opt_discard, "discard"},
+	{Opt_nodiscard, "nodiscard"},
 	{Opt_delayed_meta, "delayed_meta"},
-	{Opt_nodelayed_meta, "nodelayed_meta"},
 	{Opt_err, NULL}
 };
 
@@ -3434,8 +3434,8 @@ static int parse_options(struct super_block *sb, char *options, int silent,
 	opts->tz_utc = 0;
 	opts->symlink = 0;
 	opts->errors = EXFAT_ERRORS_RO;
-	opts->discard = 0;
-	opts->delayed_meta = 1;
+	opts->discard = 1;
+	opts->delayed_meta = 0;
 
 	if (!options)
 		goto out;
@@ -3513,11 +3513,11 @@ static int parse_options(struct super_block *sb, char *options, int silent,
 		case Opt_err_ro:
 			opts->errors = EXFAT_ERRORS_RO;
 			break;
-		case Opt_discard:
-			opts->discard = 1;
+		case Opt_nodiscard:
+			opts->discard = 0;
 			break;
-		case Opt_nodelayed_meta:
-			opts->delayed_meta = 0;
+		case Opt_delayed_meta:
+			opts->delayed_meta = 1;
 			break;
 		default:
 			if (!silent) {
