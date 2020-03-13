@@ -49,7 +49,7 @@ rm -f $ZIMG
 export ARCH=arm64
 export SUBARCH=arm64
 export HEADER_ARCH=arm64
-export CLANG_PATH=/home/pzqqt/build_toolchain/android_prebuilts_clang_host_linux-x86_clang-10.0.4-r377782b
+export CLANG_PATH=/home/pzqqt/build_toolchain/android_prebuilts_clang_host_linux-x86_clang-10.0.5-r377782c
 export KBUILD_COMPILER_STRING=$($CLANG_PATH/bin/clang --version | head -n 1 | perl -pe 's/\(http.*?\)//gs' | sed -e 's/  */ /g' -e 's/[[:space:]]*$//')
 
 export KBUILD_BUILD_HOST="lenovo"
