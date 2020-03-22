@@ -42,7 +42,7 @@ $uv_flag && $more_uv_flag && {
 	exit 1
 }
 
-export LOCALVERSION=-v4.7
+export LOCALVERSION=-v4.9
 
 rm -f $ZIMG
 
