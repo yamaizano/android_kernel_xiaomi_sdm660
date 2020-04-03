@@ -49,7 +49,7 @@ rm -f $ZIMG
 export ARCH=arm64
 export SUBARCH=arm64
 export HEADER_ARCH=arm64
-export CLANG_PATH=/home/pzqqt/build_toolchain/android_prebuilts_clang_host_linux-x86_clang-10.0.5-r377782c
+export CLANG_PATH=/home/pzqqt/build_toolchain/LiuNian_Clang_20200402
 export KBUILD_COMPILER_STRING=$($CLANG_PATH/bin/clang --version | head -n 1 | perl -pe 's/\(http.*?\)//gs' | sed -e 's/  */ /g' -e 's/[[:space:]]*$//')
 
 export KBUILD_BUILD_HOST="lenovo"
@@ -73,8 +73,8 @@ make $make_flag -j6 \
 	O=out \
 	CC="${ccache_} ${CLANG_PATH}/bin/clang" \
 	CLANG_TRIPLE=aarch64-linux-gnu- \
-	CROSS_COMPILE=/home/pzqqt/build_toolchain/gcc-arm-9.2-2019.12-x86_64-aarch64-none-linux-gnu/bin/aarch64-none-linux-gnu- \
-	CROSS_COMPILE_ARM32=/home/pzqqt/build_toolchain/gcc-arm-9.2-2019.12-x86_64-arm-none-linux-gnueabihf/bin/arm-none-linux-gnueabihf-
+	CROSS_COMPILE="${CLANG_PATH}/bin/aarch64-linux-gnu-" \
+	CROSS_COMPILE_ARM32="${CLANG_PATH}/bin/arm-linux-gnueabi-"
 
 exit_code=$?
 End=$(date +"%s")
