@@ -63,7 +63,6 @@
 		reg-names = "kgsl_3d0_reg_memory", "qfprom_memory";
 		interrupts = <0 300 0>;
 		interrupt-names = "kgsl_3d0_irq";
-		#cooling-cells = <2>;
 		qcom,id = <0>;
 
 		qcom,chipid = <0x05010200>;
@@ -691,7 +690,6 @@
 		qcom,secure_align_mask = <0xfff>;
 		qcom,retention;
 		qcom,hyp_secure_alloc;
-		qcom,secure_pt_early_alloc;
 
 		gfx3d_user: gfx3d_user {
 			compatible = "qcom,smmu-kgsl-cb";
