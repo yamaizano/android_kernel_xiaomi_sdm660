@@ -1135,7 +1135,7 @@ out_set:
 	sigaddset(&pending->signal, sig);
 	complete_signal(sig, t, group);
 ret:
-	trace_signal_generate(sig, info, t, group, result);
+//	trace_signal_generate(sig, info, t, group, result);
 	return ret;
 }
 
@@ -1626,7 +1626,7 @@ int send_sigqueue(struct sigqueue *q, struct task_struct *t, int group)
 	complete_signal(sig, t, group);
 	result = TRACE_SIGNAL_DELIVERED;
 out:
-	trace_signal_generate(sig, &q->info, t, group, result);
+//	trace_signal_generate(sig, &q->info, t, group, result);
 	unlock_task_sighand(t, &flags);
 ret:
 	return ret;
@@ -1660,7 +1660,7 @@ bool do_notify_parent(struct task_struct *tsk, int sig)
 		 * This is only possible if parent == real_parent.
 		 * Check if it has changed security domain.
 		 */
-		if (tsk->parent_exec_id != tsk->parent->self_exec_id)
+		if (tsk->parent_exec_id != READ_ONCE(tsk->parent->self_exec_id))
 			sig = SIGCHLD;
 	}
 
@@ -2258,8 +2258,8 @@ relock:
 	if (signal_group_exit(signal)) {
 		ksig->info.si_signo = signr = SIGKILL;
 		sigdelset(&current->pending.signal, SIGKILL);
-		trace_signal_deliver(SIGKILL, SEND_SIG_NOINFO,
-				&sighand->action[SIGKILL - 1]);
+//		trace_signal_deliver(SIGKILL, SEND_SIG_NOINFO,
+//				&sighand->action[SIGKILL - 1]);
 		recalc_sigpending();
 		goto fatal;
 	}
