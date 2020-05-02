@@ -2211,6 +2211,8 @@ static int dwc3_msm_suspend(struct dwc3_msm *mdwc, bool hibernation)
 		dev_dbg(mdwc->dev, "defer suspend with %d(msecs)\n",
 					mdwc->lpm_to_suspend_delay);
 		pm_wakeup_event(mdwc->dev, mdwc->lpm_to_suspend_delay);
+	} else {
+		pm_relax(mdwc->dev);
 	}
 
 	atomic_set(&dwc->in_lpm, 1);
@@ -2252,12 +2254,21 @@ static int dwc3_msm_resume(struct dwc3_msm *mdwc)
 
 	dev_dbg(mdwc->dev, "%s: exiting lpm\n", __func__);
 
+	/*
+	 * If h/w exited LPM without any events, ensure
+	 * h/w is reset before processing any new events.
+	 */
+	if (!mdwc->vbus_active && mdwc->id_state)
+		set_bit(WAIT_FOR_LPM, &mdwc->inputs);
+
 	mutex_lock(&mdwc->suspend_resume_mutex);
 	if (!atomic_read(&dwc->in_lpm)) {
 		dev_dbg(mdwc->dev, "%s: Already resumed\n", __func__);
 		mutex_unlock(&mdwc->suspend_resume_mutex);
 		return 0;
 	}
+
+	pm_stay_awake(mdwc->dev);
 
 	/* Enable bus voting */
 	if (mdwc->bus_perf_client) {
@@ -4063,6 +4074,12 @@ static void dwc3_otg_sm_work(struct work_struct *w)
 			pm_runtime_get_sync(mdwc->dev);
 			dbg_event(0xFF, "!SUSP gsync",
 				atomic_read(&mdwc->dev->power.usage_count));
+		} else {
+			/*
+			 * Release PM Wakelock if PM resume had happened from
+			 * peripheral mode bus suspend case.
+			 */
+			pm_relax(mdwc->dev);
 		}
 		break;
 
