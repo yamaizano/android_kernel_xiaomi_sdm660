@@ -9,7 +9,6 @@ ZIMG=./out/arch/arm64/boot/Image.gz-dtb
 disable_mkclean=false
 mkdtbs=false
 oc_flag=false
-uv_flag=false
 more_uv_flag=false
 campatch_flag=false
 
@@ -18,7 +17,6 @@ for arg in $@; do
 		"--noclean") disable_mkclean=true;;
 		"--dtbs") mkdtbs=true;;
 		"-oc") oc_flag=true;;
-		"-40uv") uv_flag=true;;
 		"-80uv") more_uv_flag=true;;
 		"-campatch") campatch_flag=true;;
 		*) {
@@ -28,7 +26,6 @@ operate:
     --noclean   : build without run "make mrproper"
     --dtbs      : build dtbs only
     -oc         : build with apply Overclock patch
-    -40uv       : build with apply 40mv UV patch
     -80uv       : build with apply 80mv UV patch
     -campatch   : build with apply camera fix patch
 EOF
@@ -36,11 +33,6 @@ EOF
         };;
 	esac
 done
-
-$uv_flag && $more_uv_flag && {
-	echo "Parameter -40uv and parameter -80uv cannot exist at the same time"
-	exit 1
-}
 
 export LOCALVERSION=-v5.5
 
@@ -58,7 +50,6 @@ export KBUILD_BUILD_USER="pzqqt"
 ccache_=`which ccache`
 
 $oc_flag && { git apply ./oc.patch || exit 1; }
-$uv_flag && { git apply ./40mv_uv.patch || exit 1; }
 $more_uv_flag && { git apply ./80mv_uv.patch || exit 1; }
 $campatch_flag && { git apply ./campatch.patch || exit 1; }
 
@@ -81,7 +72,6 @@ End=$(date +"%s")
 Diff=$(($End - $Start))
 
 $oc_flag && { git apply -R ./oc.patch || exit 1; }
-$uv_flag && { git apply -R ./40mv_uv.patch || exit 1; }
 $more_uv_flag && { git apply -R ./80mv_uv.patch || exit 1; }
 $campatch_flag && { git apply -R ./campatch.patch || exit 1; }
 
