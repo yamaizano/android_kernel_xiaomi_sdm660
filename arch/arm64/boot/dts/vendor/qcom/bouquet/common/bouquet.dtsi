@@ -59,6 +59,10 @@
 	/delete-property/ qcom,fde-key-size;
 };
 
+&i2c_1 {
+	qcom,disable-dma;
+};
+
 #include "bouquet-audio.dtsi"
 #include "bouquet-camera.dtsi"
 #include "bouquet-fingerprint.dtsi"
