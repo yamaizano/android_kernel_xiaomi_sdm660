@@ -1,4 +1,4 @@
-/* Copyright (c) 2016-2018, The Linux Foundation. All rights reserved.
+/* Copyright (c) 2016-2020, The Linux Foundation. All rights reserved.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -819,8 +819,12 @@ static int fg_get_msoc(struct fg_chip *chip, int *msoc)
 	else if (*msoc == 0)
 		*msoc = 0;
 	else
-		*msoc = DIV_ROUND_CLOSEST((*msoc - 1) * (FULL_CAPACITY - 2),
-				FULL_SOC_RAW - 2) + 1;
+		*msoc = DIV_ROUND_CLOSEST(*msoc * FULL_CAPACITY,
+				FULL_SOC_RAW);
+
+	if (*msoc >= FULL_CAPACITY)
+		*msoc = FULL_CAPACITY;
+
 	return 0;
 }
 
