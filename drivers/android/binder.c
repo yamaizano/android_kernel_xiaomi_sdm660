@@ -3745,8 +3745,8 @@ static int binder_thread_write(struct binder_proc *proc,
 					ret = binder_inc_ref_for_node(
 							proc, ctx_mgr_node,
 							strong, NULL, &rdata);
-				mutex_unlock(&context->context_mgr_node_lock);
 				}
+				mutex_unlock(&context->context_mgr_node_lock);
 			}
 			if (ret)
 				ret = binder_update_ref_for_handle(
