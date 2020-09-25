@@ -778,7 +778,7 @@ try_again:
 fail:
 	EXOFS_DBGMSG("Error: writepage_strip(0x%lx, 0x%lx)=>%d\n",
 		     inode->i_ino, page->index, ret);
-	mapping_set_error(page->mapping, -EIO);
+	set_bit(AS_EIO, &page->mapping->flags);
 	unlock_page(page);
 	return ret;
 }

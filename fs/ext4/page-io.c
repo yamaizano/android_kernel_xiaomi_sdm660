@@ -91,7 +91,7 @@ static void ext4_finish_bio(struct bio *bio)
 
 		if (bio->bi_error) {
 			SetPageError(page);
-			mapping_set_error(page->mapping, -EIO);
+			set_bit(AS_EIO, &page->mapping->flags);
 		}
 		bh = head = page_buffers(page);
 		/*
