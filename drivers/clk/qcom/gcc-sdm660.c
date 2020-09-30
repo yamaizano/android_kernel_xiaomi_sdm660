@@ -1805,7 +1805,7 @@ static struct clk_branch gcc_hmss_dvm_bus_clk = {
 		.hw.init = &(struct clk_init_data){
 			.name = "gcc_hmss_dvm_bus_clk",
 			.ops = &clk_branch2_ops,
-			.flags = CLK_IGNORE_UNUSED,
+			.flags = CLK_IS_CRITICAL,
 		},
 	},
 };
@@ -1909,6 +1909,7 @@ static struct clk_branch gcc_mss_mnoc_bimc_axi_clk = {
 		.hw.init = &(struct clk_init_data){
 			.name = "gcc_mss_mnoc_bimc_axi_clk",
 			.ops = &clk_branch2_ops,
+			.flags = CLK_IS_CRITICAL,
 		},
 	},
 };
@@ -1921,6 +1922,7 @@ static struct clk_branch gcc_mss_q6_bimc_axi_clk = {
 		.hw.init = &(struct clk_init_data){
 			.name = "gcc_mss_q6_bimc_axi_clk",
 			.ops = &clk_branch2_ops,
+			.flags = CLK_IS_CRITICAL,
 		},
 	},
 };
