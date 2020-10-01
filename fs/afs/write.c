@@ -405,7 +405,8 @@ no_more:
 		switch (ret) {
 		case -EDQUOT:
 		case -ENOSPC:
-			mapping_set_error(wb->vnode->vfs_inode.i_mapping, -ENOSPC);
+			set_bit(AS_ENOSPC,
+				&wb->vnode->vfs_inode.i_mapping->flags);
 			break;
 		case -EROFS:
 		case -EIO:
@@ -415,7 +416,7 @@ no_more:
 		case -ENOMEDIUM:
 		case -ENXIO:
 			afs_kill_pages(wb->vnode, true, first, last);
-			mapping_set_error(wb->vnode->vfs_inode.i_mapping, -EIO);
+			set_bit(AS_EIO, &wb->vnode->vfs_inode.i_mapping->flags);
 			break;
 		case -EACCES:
 		case -EPERM:
