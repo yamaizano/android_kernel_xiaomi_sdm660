@@ -34,7 +34,7 @@ EOF
 	esac
 done
 
-export LOCALVERSION=-v7.4
+export LOCALVERSION=-v7.7
 
 rm -f $ZIMG
 
