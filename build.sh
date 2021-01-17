@@ -20,7 +20,7 @@ for arg in $@; do
 		"-80uv") more_uv_flag=true;;
 		"-campatch") campatch_flag=true;;
 		*) {
-        cat <<EOF
+			cat <<EOF
 Usage: $0 <operate>
 operate:
     --noclean   : build without run "make mrproper"
@@ -29,22 +29,22 @@ operate:
     -80uv       : build with apply 80mv UV patch
     -campatch   : build with apply camera fix patch
 EOF
-        exit 1
-        };;
+			exit 1
+		};;
 	esac
 done
 
-export LOCALVERSION=-v8.0
+export LOCALVERSION=-v8.1
 
 rm -f $ZIMG
 
 export ARCH=arm64
 export SUBARCH=arm64
 export HEADER_ARCH=arm64
-export CLANG_PATH=/home/pzqqt/build_toolchain/Candy_Clang_20201120
+export CLANG_PATH=/home/pzqqt/build_toolchain/clang-r407598-12.0.1
 export KBUILD_COMPILER_STRING=$($CLANG_PATH/bin/clang --version | head -n 1 | perl -pe 's/\(http.*?\)//gs' | sed -e 's/  */ /g' -e 's/[[:space:]]*$//')
 
-export KBUILD_BUILD_HOST="lenovo"
+export KBUILD_BUILD_HOST="manjaro"
 export KBUILD_BUILD_USER="pzqqt"
 
 ccache_=`which ccache`
@@ -64,8 +64,8 @@ make $make_flag -j6 \
 	O=out \
 	CC="${ccache_} ${CLANG_PATH}/bin/clang" \
 	CLANG_TRIPLE=aarch64-linux-gnu- \
-	CROSS_COMPILE="${CLANG_PATH}/bin/aarch64-linux-gnu-" \
-	CROSS_COMPILE_ARM32="${CLANG_PATH}/bin/arm-linux-gnueabi-"
+	CROSS_COMPILE="/home/pzqqt/build_toolchain/gcc-arm-10.2-2020.11-x86_64-aarch64-none-linux-gnu/bin/aarch64-none-linux-gnu-" \
+	CROSS_COMPILE_ARM32="/home/pzqqt/build_toolchain/gcc-arm-10.2-2020.11-x86_64-arm-none-linux-gnueabihf/bin/arm-none-linux-gnueabihf-"
 
 exit_code=$?
 End=$(date +"%s")
