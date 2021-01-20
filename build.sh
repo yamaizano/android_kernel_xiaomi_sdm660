@@ -34,7 +34,12 @@ EOF
 	esac
 done
 
-export LOCALVERSION=-v8.1
+local_version="v8.1"
+
+# Add two lines of comment text
+# to avoid code conflicts when "git cherry-pick" or "git merge".
+
+export LOCALVERSION="-${local_version}-hmp"
 
 rm -f $ZIMG
 
