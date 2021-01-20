@@ -39,7 +39,7 @@ local_version="v8.1"
 # Add two lines of comment text
 # to avoid code conflicts when "git cherry-pick" or "git merge".
 
-export LOCALVERSION="-${local_version}-hmp"
+export LOCALVERSION="-${local_version}-eas"
 
 rm -f $ZIMG
 
