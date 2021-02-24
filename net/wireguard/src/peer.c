@@ -188,8 +188,7 @@ static void rcu_release(struct rcu_head *rcu)
 	struct wg_peer *peer = container_of(rcu, struct wg_peer, rcu);
 
 	dst_cache_destroy(&peer->endpoint_cache);
-	WARN_ON(wg_prev_queue_dequeue(&peer->tx_queue) || peer->tx_queue.peeked);
-	WARN_ON(wg_prev_queue_dequeue(&peer->rx_queue) || peer->rx_queue.peeked);
+	WARN_ON(wg_prev_queue_peek(&peer->tx_queue) || wg_prev_queue_peek(&peer->rx_queue));
 
 	/* The final zeroing takes care of clearing any remaining handshake key
 	 * material and other potentially sensitive information.
