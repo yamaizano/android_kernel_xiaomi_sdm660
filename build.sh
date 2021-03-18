@@ -46,7 +46,7 @@ rm -f $ZIMG
 export ARCH=arm64
 export SUBARCH=arm64
 export HEADER_ARCH=arm64
-export CLANG_PATH=/home/pzqqt/build_toolchain/clang-r412851-12.0.3
+export CLANG_PATH=/home/pzqqt/build_toolchain/clang-r416183-12.0.4
 export KBUILD_COMPILER_STRING=$($CLANG_PATH/bin/clang --version | head -n 1 | perl -pe 's/\(http.*?\)//gs' | sed -e 's/  */ /g' -e 's/[[:space:]]*$//')
 
 export KBUILD_BUILD_HOST="manjaro"
