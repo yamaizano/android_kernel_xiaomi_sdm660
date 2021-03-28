@@ -59,6 +59,7 @@
 #include <linux/mutex.h>
 #include <linux/cgroup.h>
 #include <linux/wait.h>
+#include <linux/binfmts.h>
 
 struct static_key cpusets_pre_enable_key __read_mostly = STATIC_KEY_INIT_FALSE;
 struct static_key cpusets_enabled_key __read_mostly = STATIC_KEY_INIT_FALSE;
@@ -1762,7 +1763,9 @@ static ssize_t cpuset_write_resmask(struct kernfs_open_file *of,
 	free_trial_cpuset(trialcs);
 
 #ifdef CONFIG_UCLAMP_ASSIST
-	uclamp_set(of, nbytes, off);
+	// Uclamp Assist: Only overwrite if current task is booster.
+	if (task_is_booster(current))
+		uclamp_set(of, nbytes, off);
 #endif
 out_unlock:
 	mutex_unlock(&cpuset_mutex);
