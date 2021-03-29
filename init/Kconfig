@@ -1456,15 +1456,10 @@ config CPUSETS_ASSIST
 	  If unsure, say N.
 
 config UCLAMP_ASSIST
-	bool "Uclamp configuration helper"
-	depends on CPUSETS
-	depends on ANDROID
-	depends on UCLAMP_TASK_GROUP
-	depends on CPUSETS_ASSIST
+	bool "UClamp configuration helper"
+	depends on CPUSETS && ANDROID && UCLAMP_TASK && UCLAMP_TASK_GROUP
 	help
-	  This option enables in-kernel overrides for uclamp values.
-
-	  If unsure, say N.
+	  This option enabled in-kernel uclamp setting overrides.
 
 config DYNAMIC_STUNE_BOOST
 	bool "Dynamic SchedTune boosting support"
