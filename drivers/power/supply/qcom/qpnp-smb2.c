@@ -317,7 +317,7 @@ static int smb2_parse_dt(struct smb2 *chip)
 						"qcom,pd-not-supported");
 
 	if (hwc_check_global || hwc_check_cn) {
-		chg->batt_profile_fcc_ua = 2300000;
+		chg->batt_profile_fcc_ua = 2900000;
 #ifdef CONFIG_XIAOMI_TULIP
 		if (is_poweroff_charge) {
 			if (hwc_check_india)
