@@ -950,7 +950,7 @@ static int fg_get_batt_profile(struct fg_dev *fg)
 	}
 
 	if (hwc_check_global || hwc_check_cn) {
-		fg->bp.fastchg_curr_ma = 2300;
+		fg->bp.fastchg_curr_ma = 2900;
 	}
 #ifdef CONFIG_XIAOMI_TULIP
 	else
