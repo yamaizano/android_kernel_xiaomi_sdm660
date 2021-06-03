@@ -34,7 +34,7 @@ EOF
 	esac
 done
 
-local_version="v9.7"
+local_version="v9.8"
 
 # Add two lines of comment text
 # to avoid code conflicts when "git cherry-pick" or "git merge".
@@ -46,7 +46,7 @@ rm -f $ZIMG
 export ARCH=arm64
 export SUBARCH=arm64
 export HEADER_ARCH=arm64
-export CLANG_PATH=/home/pzqqt/build_toolchain/clang-r416183b-12.0.5
+export CLANG_PATH=/home/pzqqt/build_toolchain/clang-r416183c-12.0.6
 export KBUILD_COMPILER_STRING=$($CLANG_PATH/bin/clang --version | head -n 1 | perl -pe 's/\(http.*?\)//gs' | sed -e 's/  */ /g' -e 's/[[:space:]]*$//')
 
 export KBUILD_BUILD_HOST="wsl2"
