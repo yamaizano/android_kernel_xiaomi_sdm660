@@ -34,7 +34,7 @@ EOF
 	esac
 done
 
-local_version="v10.5"
+local_version="v10.6"
 
 # Add two lines of comment text
 # to avoid code conflicts when "git cherry-pick" or "git merge".
@@ -46,7 +46,7 @@ rm -f $ZIMG
 export ARCH=arm64
 export SUBARCH=arm64
 export HEADER_ARCH=arm64
-export CLANG_PATH=/home/pzqqt/build_toolchain/clang-r416183d-12.0.7
+export CLANG_PATH=/home/pzqqt/build_toolchain/clang-r428724-13.0.1
 export KBUILD_COMPILER_STRING=$($CLANG_PATH/bin/clang --version | head -n 1 | perl -pe 's/\(http.*?\)//gs' | sed -e 's/  */ /g' -e 's/[[:space:]]*$//')
 
 export KBUILD_BUILD_HOST="wsl2"
@@ -69,8 +69,8 @@ make $make_flag -j$(nproc --all) \
 	O=out \
 	CC="${ccache_} ${CLANG_PATH}/bin/clang" \
 	CLANG_TRIPLE=aarch64-linux-gnu- \
-	CROSS_COMPILE="/home/pzqqt/build_toolchain/gcc-arm-10.2-2020.11-x86_64-aarch64-none-linux-gnu/bin/aarch64-none-linux-gnu-" \
-	CROSS_COMPILE_ARM32="/home/pzqqt/build_toolchain/gcc-arm-10.2-2020.11-x86_64-arm-none-linux-gnueabihf/bin/arm-none-linux-gnueabihf-"
+	CROSS_COMPILE="/home/pzqqt/build_toolchain/gcc-arm-10.3-2021.07-x86_64-aarch64-none-linux-gnu/bin/aarch64-none-linux-gnu-" \
+	CROSS_COMPILE_ARM32="/home/pzqqt/build_toolchain/gcc-arm-10.3-2021.07-x86_64-arm-none-linux-gnueabihf/bin/arm-none-linux-gnueabihf-"
 
 exit_code=$?
 End=$(date +"%s")
