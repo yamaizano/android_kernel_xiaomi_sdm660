@@ -9,7 +9,6 @@ ZIMG=./out/arch/arm64/boot/Image.gz-dtb
 disable_mkclean=false
 mkdtbs=false
 oc_flag=false
-more_uv_flag=false
 campatch_flag=false
 
 for arg in $@; do
@@ -17,7 +16,6 @@ for arg in $@; do
 		"--noclean") disable_mkclean=true;;
 		"--dtbs") mkdtbs=true;;
 		"-oc") oc_flag=true;;
-		"-80uv") more_uv_flag=true;;
 		"-campatch") campatch_flag=true;;
 		*) {
 			cat <<EOF
@@ -26,7 +24,6 @@ operate:
     --noclean   : build without run "make mrproper"
     --dtbs      : build dtbs only
     -oc         : build with apply Overclock patch
-    -80uv       : build with apply 80mv UV patch
     -campatch   : build with apply camera fix patch
 EOF
 			exit 1
@@ -55,7 +52,6 @@ export KBUILD_BUILD_USER="pzqqt"
 ccache_=`which ccache`
 
 $oc_flag && { git apply ./oc.patch || exit 1; }
-$more_uv_flag && { git apply ./80mv_uv.patch || exit 1; }
 $campatch_flag && { git apply ./campatch.patch || exit 1; }
 
 $disable_mkclean || make mrproper O=out || exit 1
@@ -77,7 +73,6 @@ End=$(date +"%s")
 Diff=$(($End - $Start))
 
 $oc_flag && { git apply -R ./oc.patch || exit 1; }
-$more_uv_flag && { git apply -R ./80mv_uv.patch || exit 1; }
 $campatch_flag && { git apply -R ./campatch.patch || exit 1; }
 
 if $mkdtbs; then
