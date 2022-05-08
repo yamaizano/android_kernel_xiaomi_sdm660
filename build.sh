@@ -43,7 +43,7 @@ rm -f $ZIMG
 export ARCH=arm64
 export SUBARCH=arm64
 export HEADER_ARCH=arm64
-export CLANG_PATH=/home/pzqqt/build_toolchain/clang-r428724-13.0.1
+export CLANG_PATH=/home/pzqqt/build_toolchain/clang-r450784e-14.0.7
 
 export KBUILD_BUILD_HOST="wsl2"
 export KBUILD_BUILD_USER="pzqqt"
@@ -64,8 +64,8 @@ make $make_flag -j$(nproc --all) \
 	O=out \
 	CC="${ccache_} ${CLANG_PATH}/bin/clang" \
 	CLANG_TRIPLE=aarch64-linux-gnu- \
-	CROSS_COMPILE="/home/pzqqt/build_toolchain/gcc-arm-10.3-2021.07-x86_64-aarch64-none-linux-gnu/bin/aarch64-none-linux-gnu-" \
-	CROSS_COMPILE_ARM32="/home/pzqqt/build_toolchain/gcc-arm-10.3-2021.07-x86_64-arm-none-linux-gnueabihf/bin/arm-none-linux-gnueabihf-"
+	CROSS_COMPILE="/home/pzqqt/build_toolchain/gcc-arm-11.2-2022.02-x86_64-aarch64-none-linux-gnu/bin/aarch64-none-linux-gnu-" \
+	CROSS_COMPILE_ARM32="/home/pzqqt/build_toolchain/gcc-arm-11.2-2022.02-x86_64-arm-none-linux-gnueabihf/bin/arm-none-linux-gnueabihf-"
 
 exit_code=$?
 End=$(date +"%s")
