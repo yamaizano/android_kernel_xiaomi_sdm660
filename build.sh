@@ -7,6 +7,7 @@ gre='\e[0;32m'
 ZIMG=./out/arch/arm64/boot/Image.gz-dtb
 
 disable_mkclean=false
+no_ebpf_flag=false
 mkdtbs=false
 oc_flag=false
 campatch_flag=false
@@ -14,6 +15,7 @@ campatch_flag=false
 for arg in $@; do
 	case $arg in
 		"--noclean") disable_mkclean=true;;
+		"--noebpf") no_ebpf_flag=true;;
 		"--dtbs") mkdtbs=true;;
 		"-oc") oc_flag=true;;
 		"-campatch") campatch_flag=true;;
@@ -22,6 +24,7 @@ for arg in $@; do
 Usage: $0 <operate>
 operate:
     --noclean   : build without run "make mrproper"
+    --noebpf    : build without eBPF
     --dtbs      : build dtbs only
     -oc         : build with apply Overclock patch
     -campatch   : build with apply camera fix patch
@@ -37,6 +40,7 @@ local_version="v11.0"
 # to avoid code conflicts when "git cherry-pick" or "git merge".
 
 export LOCALVERSION="-${local_version}-hmp"
+$no_ebpf_flag || export LOCALVERSION="${LOCALVERSION}-a12"
 
 rm -f $ZIMG
 
@@ -56,11 +60,19 @@ $campatch_flag && { git apply ./campatch.patch || exit 1; }
 $disable_mkclean || make mrproper O=out || exit 1
 make whyred-perf_defconfig O=out || exit 1
 
+$no_ebpf_flag && {
+	for config_item in CGROUP_BPF BPF_SYSCALL NETFILTER_XT_MATCH_BPF NETFILTER_XT_MATCH_OWNER NET_CLS_BPF NET_ACT_BPF BPF_JIT; do
+		./scripts/config --file out/.config -d $config_item
+	done
+	./scripts/config --file out/.config -e NETFILTER_XT_MATCH_QTAGUID
+	./scripts/config --file out/.config -e BPF_NETFILTER_XT_MATCH_QTAGUID
+}
+
 Start=$(date +"%s")
 
 $mkdtbs && make_flag="dtbs" || make_flag=""
 
-make $make_flag -j$(nproc --all) \
+yes | make $make_flag -j$(nproc --all) \
 	O=out \
 	CC="${ccache_} ${CLANG_PATH}/bin/clang" \
 	OBJDUMP=${CLANG_PATH}/bin/llvm-objdump \
