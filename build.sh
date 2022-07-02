@@ -34,7 +34,7 @@ EOF
 	esac
 done
 
-local_version="v11.0"
+local_version="v12.3"
 
 # Add two lines of comment text
 # to avoid code conflicts when "git cherry-pick" or "git merge".
