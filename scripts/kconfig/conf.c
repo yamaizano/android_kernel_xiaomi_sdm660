@@ -38,7 +38,6 @@ enum input_mode {
 
 static int indent = 1;
 static int tty_stdio;
-static int valid_stdin = 1;
 static int sync_kconfig;
 static int conf_cnt;
 static char line[128];
@@ -71,16 +70,6 @@ static void strip(char *str)
 		*p-- = 0;
 }
 
-static void check_stdin(void)
-{
-	if (!valid_stdin) {
-		printf(_("aborted!\n\n"));
-		printf(_("Console input/output is redirected. "));
-		printf(_("Run 'make oldconfig' to update configuration.\n\n"));
-		exit(1);
-	}
-}
-
 static int conf_askvalue(struct symbol *sym, const char *def)
 {
 	enum symbol_type type = sym_get_type(sym);
@@ -105,7 +94,6 @@ static int conf_askvalue(struct symbol *sym, const char *def)
 			printf("%s\n", def);
 			return 0;
 		}
-		check_stdin();
 		/* fall through */
 	case oldaskconfig:
 		fflush(stdout);
@@ -307,7 +295,6 @@ static int conf_choice(struct menu *menu)
 				printf("%d\n", cnt);
 				break;
 			}
-			check_stdin();
 			/* fall through */
 		case oldaskconfig:
 			fflush(stdout);
@@ -641,7 +628,6 @@ int main(int ac, char **av)
 				return 1;
 			}
 		}
-		valid_stdin = tty_stdio;
 	}
 
 	switch (input_mode) {

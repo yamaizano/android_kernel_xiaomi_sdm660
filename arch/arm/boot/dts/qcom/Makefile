@@ -213,8 +213,7 @@ endif
 dtb-$(CONFIG_ARCH_MSMHAMSTER) += msmhamster-rumi.dtb
 
 ifeq ($(CONFIG_KERNEL_CUSTOM_E7S),y)
-dtb-$(CONFIG_ARCH_SDM660) += sdm636-mtp_e7s.dtb \
-	sdm660-mtp.dtb 
+dtb-$(CONFIG_ARCH_SDM660) += sdm636-mtp_e7s.dtb
 else
 dtb-$(CONFIG_ARCH_SDM660) += sdm660-sim.dtb \
 	sdm660-internal-codec-cdp.dtb \

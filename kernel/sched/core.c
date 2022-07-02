@@ -2748,6 +2748,9 @@ out:
 
 bool cpus_share_cache(int this_cpu, int that_cpu)
 {
+	if (this_cpu == that_cpu)
+		return true;
+
 	return per_cpu(sd_llc_id, this_cpu) == per_cpu(sd_llc_id, that_cpu);
 }
 #endif /* CONFIG_SMP */
@@ -9675,7 +9678,7 @@ static void cpu_cgroup_css_free(struct cgroup_subsys_state *css)
  * This is called before wake_up_new_task(), therefore we really only
  * have to set its group bits, all the other stuff does not apply.
  */
-static void cpu_cgroup_fork(struct task_struct *task, void *private)
+static void cpu_cgroup_fork(struct task_struct *task)
 {
 	struct rq_flags rf;
 	struct rq *rq;
