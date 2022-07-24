@@ -643,10 +643,10 @@ ifeq ($(cc-name),gcc)
 KBUILD_CFLAGS	+= -mcpu=cortex-a73.cortex-a53
 KBUILD_AFLAGS	+= -mcpu=cortex-a73.cortex-a53
 endif
-ifeq ($(cc-name),clang)
-KBUILD_CFLAGS	+= -mcpu=cortex-a53
-KBUILD_AFLAGS	+= -mcpu=cortex-a53
-endif
+# ifeq ($(cc-name),clang)
+# KBUILD_CFLAGS	+= -mcpu=cortex-a53
+# KBUILD_AFLAGS	+= -mcpu=cortex-a53
+# endif
 
 KBUILD_CFLAGS	+= $(call cc-option,-fno-delete-null-pointer-checks,)
 KBUILD_CFLAGS	+= $(call cc-disable-warning,frame-address,)
