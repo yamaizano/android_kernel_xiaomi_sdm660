@@ -64,6 +64,7 @@ $no_ebpf_flag && {
 	for config_item in CGROUP_BPF BPF_SYSCALL NETFILTER_XT_MATCH_BPF NETFILTER_XT_MATCH_OWNER NET_CLS_BPF NET_ACT_BPF BPF_JIT; do
 		./scripts/config --file out/.config -d $config_item
 	done
+	./scripts/config --file out/.config -e RT_GROUP_SCHED
 	./scripts/config --file out/.config -e NETFILTER_XT_MATCH_QTAGUID
 	./scripts/config --file out/.config -e BPF_NETFILTER_XT_MATCH_QTAGUID
 }
