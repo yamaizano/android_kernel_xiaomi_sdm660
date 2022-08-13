@@ -34,7 +34,7 @@ EOF
 	esac
 done
 
-local_version="v12.3"
+local_version="v12.4"
 
 # Add two lines of comment text
 # to avoid code conflicts when "git cherry-pick" or "git merge".
@@ -47,7 +47,7 @@ rm -f $ZIMG
 export ARCH=arm64
 export SUBARCH=arm64
 export HEADER_ARCH=arm64
-export CLANG_PATH=/home/pzqqt/build_toolchain/clang-r450784e-14.0.7
+export CLANG_PATH=/home/pzqqt/build_toolchain/clang-r458507-15.0.1
 
 export KBUILD_BUILD_HOST="wsl2"
 export KBUILD_BUILD_USER="pzqqt"
@@ -64,6 +64,7 @@ $no_ebpf_flag && {
 	for config_item in CGROUP_BPF BPF_SYSCALL NETFILTER_XT_MATCH_BPF NETFILTER_XT_MATCH_OWNER NET_CLS_BPF NET_ACT_BPF BPF_JIT; do
 		./scripts/config --file out/.config -d $config_item
 	done
+	./scripts/config --file out/.config -e RT_GROUP_SCHED
 	./scripts/config --file out/.config -e NETFILTER_XT_MATCH_QTAGUID
 	./scripts/config --file out/.config -e BPF_NETFILTER_XT_MATCH_QTAGUID
 }

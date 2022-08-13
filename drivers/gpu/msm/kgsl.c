@@ -1273,7 +1273,7 @@ kgsl_sharedmem_find(struct kgsl_process_private *private, uint64_t gpuaddr)
 	if (!private)
 		return NULL;
 
-	if (!kgsl_mmu_gpuaddr_in_range(private->pagetable, gpuaddr))
+	if (!kgsl_mmu_gpuaddr_in_range(private->pagetable, gpuaddr, 0))
 		return NULL;
 
 	spin_lock(&private->mem_lock);
@@ -2231,15 +2231,6 @@ static int kgsl_setup_anon_useraddr(struct kgsl_pagetable *pagetable,
 	return ret;
 }
 
-static int match_file(const void *p, struct file *file, unsigned int fd)
-{
-	/*
-	 * We must return fd + 1 because iterate_fd stops searching on
-	 * non-zero return, but 0 is a valid fd.
-	 */
-	return (p == file) ? (fd + 1) : 0;
-}
-
 static void _setup_cache_mode(struct kgsl_mem_entry *entry,
 		struct vm_area_struct *vma)
 {
@@ -2278,8 +2269,6 @@ static int kgsl_setup_dmabuf_useraddr(struct kgsl_device *device,
 	vma = find_vma(current->mm, hostptr);
 
 	if (vma && vma->vm_file) {
-		int fd;
-
 		ret = check_vma_flags(vma, entry->memdesc.flags);
 		if (ret) {
 			up_read(&current->mm->mmap_sem);
@@ -2295,10 +2284,13 @@ static int kgsl_setup_dmabuf_useraddr(struct kgsl_device *device,
 			return -EFAULT;
 		}
 
-		/* Look for the fd that matches this the vma file */
-		fd = iterate_fd(current->files, 0, match_file, vma->vm_file);
-		if (fd != 0)
-			dmabuf = dma_buf_get(fd - 1);
+		/*
+		 * Take a refcount because dma_buf_put() decrements the
+		 * refcount
+		 */
+		get_file(vma->vm_file);
+
+		dmabuf = vma->vm_file->private_data;
 	}
 
 	if (IS_ERR_OR_NULL(dmabuf)) {
@@ -4881,8 +4873,7 @@ int kgsl_device_platform_probe(struct kgsl_device *device)
 	}
 
 	status = devm_request_irq(device->dev, device->pwrctrl.interrupt_num,
-				  kgsl_irq_handler,
-				  IRQF_TRIGGER_HIGH | IRQF_PERF_CRITICAL,
+				  kgsl_irq_handler, IRQF_TRIGGER_HIGH,
 				  device->name, device);
 	if (status) {
 		KGSL_DRV_ERR(device, "request_irq(%d) failed: %d\n",
@@ -5101,7 +5092,7 @@ static int __init kgsl_core_init(void)
 
 	init_kthread_worker(&kgsl_driver.worker);
 
-	kgsl_driver.worker_thread = kthread_run_perf_critical(kthread_worker_fn,
+	kgsl_driver.worker_thread = kthread_run(kthread_worker_fn,
 		&kgsl_driver.worker, "kgsl_worker_thread");
 
 	if (IS_ERR(kgsl_driver.worker_thread)) {
