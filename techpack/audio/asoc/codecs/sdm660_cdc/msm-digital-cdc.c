@@ -1372,7 +1372,7 @@ static ssize_t earpiece_gain_store(struct kobject *kobj,
 {
 	int input;
  	sscanf(buf, "%d", &input);
- 	if (input < -84 || input > 20)
+ 	if (input < -84 || input > 6)
 		input = 0;
  	snd_soc_component_write(sound_control_codec_ptr, MSM89XX_CDC_CORE_RX3_VOL_CTL_B2_CTL, input);
  	return count;
