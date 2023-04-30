@@ -1167,7 +1167,7 @@ static unsigned long shrink_page_list(struct list_head *page_list,
 			goto keep_locked;
 
 		/* page_update_gen() tried to promote this page? */
-		if (lru_gen_enabled() && !ignore_references &&
+		if (lru_gen_enabled() && !skip_reference_check &&
 		    page_mapped(page) && PageReferenced(page))
 			goto keep_locked;
 
@@ -2111,12 +2111,12 @@ static unsigned move_active_pages_to_lru(struct lruvec *lruvec,
 		VM_BUG_ON_PAGE(PageLRU(page), page);
 		list_del(&page->lru);
 		SetPageLRU(page);
-		add_page_to_lru_list(page, lruvec, lru);
+		add_page_to_lru_list(page, lruvec);
 
 		if (put_page_testzero(page)) {
 			__ClearPageLRU(page);
 			__ClearPageActive(page);
-			del_page_from_lru_list(page, lruvec, lru);
+			del_page_from_lru_list(page, lruvec);
 
 			if (unlikely(PageCompound(page))) {
 				spin_unlock_irq(&pgdat->lru_lock);
@@ -3683,10 +3683,10 @@ static void walk_mm(struct lruvec *lruvec, struct mm_struct *mm, struct lru_gen_
 			break;
 
 		/* the caller might be holding the lock for write */
-		if (mmap_read_trylock(mm)) {
+		if (down_read_trylock(&mm->mmap_sem)) {
 			err = walk_page_range(mm, walk->next_addr, ULONG_MAX, &mm_walk_ops, walk);
 
-			mmap_read_unlock(mm);
+			down_read(&mm->mmap_sem);
 		}
 
 		mem_cgroup_unlock_pages();
@@ -4374,8 +4374,8 @@ static int scan_pages(struct lruvec *lruvec, struct scan_control *sc,
 		__count_vm_events(item, isolated);
 		__count_vm_events(PGREFILL, sorted);
 	}
-	__count_memcg_events(memcg, item, isolated);
-	__count_memcg_events(memcg, PGREFILL, sorted);
+	count_memcg_events(memcg, item, isolated);
+	count_memcg_events(memcg, PGREFILL, sorted);
 
 	/*
 	 * There might not be eligible pages due to reclaim_idx, may_unmap and
@@ -4520,7 +4520,7 @@ static int evict_pages(struct lruvec *lruvec, struct scan_control *sc, int swapp
 
 	spin_lock_irq(&pgdat->lru_lock);
 
-	move_pages_to_lru(lruvec, &list);
+	putback_inactive_pages(lruvec, &list);
 
 	walk = current->reclaim_state->mm_walk;
 	if (walk && walk->batched)
@@ -4529,7 +4529,7 @@ static int evict_pages(struct lruvec *lruvec, struct scan_control *sc, int swapp
 	item = current_is_kswapd() ? PGSTEAL_KSWAPD : PGSTEAL_DIRECT;
 	if (global_reclaim(sc))
 		__count_vm_events(item, reclaimed);
-	__count_memcg_events(memcg, item, reclaimed);
+	count_memcg_events(memcg, item, reclaimed);
 
 	spin_unlock_irq(&pgdat->lru_lock);
 
@@ -5182,6 +5182,7 @@ static ssize_t lru_gen_seq_write(struct file *file, const char __user *src,
 	unsigned int flags;
 	struct blk_plug plug;
 	int err = -EINVAL;
+	struct reclaim_state reclaim_state;
 	struct scan_control sc = {
 		.may_writepage = true,
 		.may_unmap = true,
@@ -5199,7 +5200,7 @@ static ssize_t lru_gen_seq_write(struct file *file, const char __user *src,
 		return -EFAULT;
 	}
 
-	set_task_reclaim_state(current, &sc.reclaim_state);
+	current->reclaim_state = &reclaim_state;
 	flags = memalloc_noreclaim_save();
 	blk_start_plug(&plug);
 	if (!set_mm_walk(NULL)) {
@@ -5239,7 +5240,7 @@ done:
 	clear_mm_walk();
 	blk_finish_plug(&plug);
 	memalloc_noreclaim_restore(flags);
-	set_task_reclaim_state(current, NULL);
+	current->reclaim_state = NULL;
 
 	kvfree(buf);
 
