@@ -20,11 +20,6 @@
 #include "fg-core-xiaomi.h"
 
 extern int hwc_check_global;
-#ifdef CONFIG_XIAOMI_WHYRED
-#define LCT_JEITA_CCC_AUTO_ADJUST  1
-#else
-#define LCT_JEITA_CCC_AUTO_ADJUST 0
-#endif
 
 #define smblib_err(chg, fmt, ...)		\
 	pr_err("%s: %s: " fmt, chg->name,	\
@@ -357,61 +352,6 @@ static int smblib_set_opt_freq_buck(struct smb_charger *chg, int fsw_khz)
 
 	return rc;
 }
-
-#if LCT_JEITA_CCC_AUTO_ADJUST
-/*
-jeita cc COMP regiseter is 1092,please refer to qualcom doc:80_P7905_2X ,SCHG_CHGR_JEITA_CCCOMP_CFG
-qcom,thermal-mitigation					= <2500000 2000000 1000000 800000 500000>;
-jeita current = fcc - JEITA_CC_COMP_CFG_IN_UEFI*1000
-*/
-
-#define JEITA_CC_COMP_CFG_IN_UEFI  1200
-
-static int smblib_adjust_jeita_cc_config(struct smb_charger *chg,int val_u)
-{
-	int rc= 0;
-	int current_cc_minus_ua = 0;
-
-
-	pr_err("smblib_adjust_jeita_cc_config fcc val_u  = %d\n",val_u);
-
-	rc = smblib_get_charge_param(chg,&chg->param.jeita_cc_comp,&current_cc_minus_ua);
-	pr_err("lct smblib_adjust_jeita_cc_config jeita cc current_cc_minus_ua = %d\n",current_cc_minus_ua);
-
-	if((val_u == chg->batt_profile_fcc_ua) && (current_cc_minus_ua != JEITA_CC_COMP_CFG_IN_UEFI * 1000 ) )
-	{
-		rc = smblib_set_charge_param(chg,&chg->param.jeita_cc_comp,JEITA_CC_COMP_CFG_IN_UEFI * 1000 );
-		pr_err("smblib_adjust_jeita_cc_config jeita cc has changed ,write it back ,write result = %d\n",rc);
-
-	}
-	else if((val_u < chg->batt_profile_fcc_ua) &&( (chg->batt_profile_fcc_ua - val_u) <= JEITA_CC_COMP_CFG_IN_UEFI * 1000) )
-	{
-		if(current_cc_minus_ua != ( JEITA_CC_COMP_CFG_IN_UEFI * 1000 - (chg->batt_profile_fcc_ua - val_u)))
-		{
-			current_cc_minus_ua = JEITA_CC_COMP_CFG_IN_UEFI * 1000 - (chg->batt_profile_fcc_ua - val_u);
-			rc = smblib_set_charge_param(chg,&chg->param.jeita_cc_comp,current_cc_minus_ua );
-			pr_err("smblib_adjust_jeita_cc_config jeita cc need to decrease to %d,write result = %d\n",current_cc_minus_ua,rc);
-		}
-		else
-		{
-			pr_err("smblib_adjust_jeita_cc_config jeita cc have decreased \n");
-		}
-
-	}
-	else if((val_u < chg->batt_profile_fcc_ua) &&( (chg->batt_profile_fcc_ua - val_u) > JEITA_CC_COMP_CFG_IN_UEFI * 1000) )
-	{
-		rc = smblib_set_charge_param(chg,&chg->param.jeita_cc_comp,0);
-		pr_err("smblib_adjust_jeita_cc_config jeita need to set to zero,write result = %d\n",rc);
-	}
-	else
-	{
-		pr_err("smblib_adjust_jeita_cc_config do nothing \n");
-	}
-
-
-	return rc;
-}
-#endif
 
 int smblib_set_charge_param(struct smb_charger *chg,
 			    struct smb_chg_param *param, int val_u)
