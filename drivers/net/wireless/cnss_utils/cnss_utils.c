@@ -7,7 +7,9 @@
 #include <linux/kernel.h>
 #include <linux/slab.h>
 #include <linux/etherdevice.h>
+#ifdef CONFIG_DEBUG_FS
 #include <linux/debugfs.h>
+#endif
 #include <net/cnss_utils.h>
 
 #define CNSS_MAX_CH_NUM 157
