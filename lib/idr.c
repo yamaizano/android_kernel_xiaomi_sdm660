@@ -361,6 +361,160 @@ EXPORT_SYMBOL(idr_replace);
  * bitmap, which is excessive.
  */
 
+#define IDA_MAX (0x80000000U / IDA_BITMAP_BITS - 1)
+
+static int ida_get_new_above(struct ida *ida, int start)
+{
+	struct radix_tree_root *root = &ida->ida_rt;
+	void __rcu **slot;
+	struct radix_tree_iter iter;
+	struct ida_bitmap *bitmap;
+	unsigned long index;
+	unsigned bit, ebit;
+	int new;
+
+	index = start / IDA_BITMAP_BITS;
+	bit = start % IDA_BITMAP_BITS;
+	ebit = bit + RADIX_TREE_EXCEPTIONAL_SHIFT;
+
+	slot = radix_tree_iter_init(&iter, index);
+	for (;;) {
+		if (slot)
+			slot = radix_tree_next_slot(slot, &iter,
+						RADIX_TREE_ITER_TAGGED);
+		if (!slot) {
+			slot = idr_get_free(root, &iter, GFP_NOWAIT, IDA_MAX);
+			if (IS_ERR(slot)) {
+				if (slot == ERR_PTR(-ENOMEM))
+					return -EAGAIN;
+				return PTR_ERR(slot);
+			}
+		}
+		if (iter.index > index) {
+			bit = 0;
+			ebit = RADIX_TREE_EXCEPTIONAL_SHIFT;
+		}
+		new = iter.index * IDA_BITMAP_BITS;
+		bitmap = rcu_dereference_raw(*slot);
+		if (radix_tree_exception(bitmap)) {
+			unsigned long tmp = (unsigned long)bitmap;
+			ebit = find_next_zero_bit(&tmp, BITS_PER_LONG, ebit);
+			if (ebit < BITS_PER_LONG) {
+				tmp |= 1UL << ebit;
+				rcu_assign_pointer(*slot, (void *)tmp);
+				return new + ebit -
+					RADIX_TREE_EXCEPTIONAL_SHIFT;
+			}
+			bitmap = this_cpu_xchg(ida_bitmap, NULL);
+			if (!bitmap)
+				return -EAGAIN;
+			bitmap->bitmap[0] = tmp >> RADIX_TREE_EXCEPTIONAL_SHIFT;
+			rcu_assign_pointer(*slot, bitmap);
+		}
+
+		if (bitmap) {
+			bit = find_next_zero_bit(bitmap->bitmap,
+							IDA_BITMAP_BITS, bit);
+			new += bit;
+			if (new < 0)
+				return -ENOSPC;
+			if (bit == IDA_BITMAP_BITS)
+				continue;
+
+			__set_bit(bit, bitmap->bitmap);
+			if (bitmap_full(bitmap->bitmap, IDA_BITMAP_BITS))
+				radix_tree_iter_tag_clear(root, &iter,
+								IDR_FREE);
+		} else {
+			new += bit;
+			if (new < 0)
+				return -ENOSPC;
+			if (ebit < BITS_PER_LONG) {
+				bitmap = (void *)((1UL << ebit) |
+						RADIX_TREE_EXCEPTIONAL_ENTRY);
+				radix_tree_iter_replace(root, &iter, slot,
+						bitmap);
+				return new;
+			}
+			bitmap = this_cpu_xchg(ida_bitmap, NULL);
+			if (!bitmap)
+				return -EAGAIN;
+			__set_bit(bit, bitmap->bitmap);
+			radix_tree_iter_replace(root, &iter, slot, bitmap);
+		}
+
+		return new;
+	}
+}
+
+static void ida_remove(struct ida *ida, int id)
+{
+	unsigned long index = id / IDA_BITMAP_BITS;
+	unsigned offset = id % IDA_BITMAP_BITS;
+	struct ida_bitmap *bitmap;
+	unsigned long *btmp;
+	struct radix_tree_iter iter;
+	void __rcu **slot;
+
+	slot = radix_tree_iter_lookup(&ida->ida_rt, &iter, index);
+	if (!slot)
+		goto err;
+
+	bitmap = rcu_dereference_raw(*slot);
+	if (radix_tree_exception(bitmap)) {
+		btmp = (unsigned long *)slot;
+		offset += RADIX_TREE_EXCEPTIONAL_SHIFT;
+		if (offset >= BITS_PER_LONG)
+			goto err;
+	} else {
+		btmp = bitmap->bitmap;
+	}
+	if (!bitmap || !test_bit(offset, btmp))
+		goto err;
+
+	__clear_bit(offset, btmp);
+	radix_tree_iter_tag_set(&ida->ida_rt, &iter, IDR_FREE);
+	if (radix_tree_exception(bitmap)) {
+		if (rcu_dereference_raw(*slot) ==
+					(void *)RADIX_TREE_EXCEPTIONAL_ENTRY)
+			radix_tree_iter_delete(&ida->ida_rt, &iter, slot);
+	} else if (bitmap_empty(btmp, IDA_BITMAP_BITS)) {
+		kfree(bitmap);
+		radix_tree_iter_delete(&ida->ida_rt, &iter, slot);
+	}
+	return;
+ err:
+	WARN(1, "ida_free called for id=%d which is not allocated.\n", id);
+}
+
+/**
+ * ida_destroy() - Free all IDs.
+ * @ida: IDA handle.
+ *
+ * Calling this function frees all IDs and releases all resources used
+ * by an IDA.  When this call returns, the IDA is empty and can be reused
+ * or freed.  If the IDA is already empty, there is no need to call this
+ * function.
+ *
+ * Context: Any context.
+ */
+void ida_destroy(struct ida *ida)
+{
+	unsigned long flags;
+	struct radix_tree_iter iter;
+	void __rcu **slot;
+
+	xa_lock_irqsave(&ida->ida_rt, flags);
+	radix_tree_for_each_slot(slot, &ida->ida_rt, &iter, 0) {
+		struct ida_bitmap *bitmap = rcu_dereference_raw(*slot);
+		if (!radix_tree_exception(bitmap))
+			kfree(bitmap);
+		radix_tree_iter_delete(&ida->ida_rt, &iter, slot);
+	}
+	xa_unlock_irqrestore(&ida->ida_rt, flags);
+}
+EXPORT_SYMBOL(ida_destroy);
+
 /**
  * ida_alloc_range() - Allocate an unused ID.
  * @ida: IDA handle.
