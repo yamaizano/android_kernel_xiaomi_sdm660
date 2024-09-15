@@ -2830,10 +2830,11 @@ void sock_init_data(struct socket *sock, struct sock *sk)
 		sk->sk_type	=	sock->type;
 		sk->sk_wq	=	sock->wq;
 		sock->sk	=	sk;
+		sk->sk_uid	=	SOCK_INODE(sock)->i_uid;
 	} else {
 		sk->sk_wq	=	NULL;
+		sk->sk_uid	=	make_kuid(sock_net(sk)->user_ns, 0);
 	}
-	sk->sk_uid	=	uid;
 
 	rwlock_init(&sk->sk_callback_lock);
 	if (sk->sk_kern_sock)
@@ -2890,16 +2891,6 @@ void sock_init_data(struct socket *sock, struct sock *sk)
 	smp_wmb();
 	refcount_set(&sk->sk_refcnt, 1);
 	atomic_set(&sk->sk_drops, 0);
-}
-EXPORT_SYMBOL(sock_init_data_uid);
-
-void sock_init_data(struct socket *sock, struct sock *sk)
-{
-	kuid_t uid = sock ?
-		SOCK_INODE(sock)->i_uid :
-		make_kuid(sock_net(sk)->user_ns, 0);
-
-	sock_init_data_uid(sock, sk, uid);
 }
 EXPORT_SYMBOL(sock_init_data);
 
