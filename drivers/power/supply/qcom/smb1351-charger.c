@@ -2946,6 +2946,7 @@ fail_smb1351_regulator_init:
 }
 
 extern int hwc_check_global;
+extern int hwc_check_cn;
 static int smb1351_parallel_charger_probe(struct i2c_client *client,
 				const struct i2c_device_id *id)
 {
@@ -2963,9 +2964,9 @@ static int smb1351_parallel_charger_probe(struct i2c_client *client,
 	chip->parallel_charger = true;
 	chip->parallel_charger_suspended = true;
 
-	if (hwc_check_global)
+	if (hwc_check_global || hwc_check_cn)
 	{
-		pr_err("Global hasn't smb1350 ragulator,return\n");
+		pr_info("Global version doesn't have smb1351 regulator, killing probe\n");
 		return -ENODEV;
 	}
 
