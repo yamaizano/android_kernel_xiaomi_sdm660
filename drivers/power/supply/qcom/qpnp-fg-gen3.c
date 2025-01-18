@@ -514,6 +514,7 @@ static bool fg_sram_dump;
 
 int hwc_check_india;
 int hwc_check_global;
+int hwc_check_cn;
 extern bool is_poweroff_charge;
 #ifdef CONFIG_XIAOMI_TULIP
 extern int rradc_die;
@@ -884,6 +885,10 @@ static int __init hwc_setup(char *s)
 		hwc_check_global = 1;
 	else
 		hwc_check_global = 0;
+	if (strcmp(s, "CN") == 0)
+		hwc_check_cn = 1;
+	else
+		hwc_check_cn = 0;
 	return 1;
 }
 __setup("androidboot.hwc=", hwc_setup);
@@ -926,7 +931,7 @@ static int fg_get_batt_profile(struct fg_dev *fg)
 		fg->bp.float_volt_uv = -EINVAL;
 	}
 
-	if (hwc_check_global) {
+	if (hwc_check_global || hwc_check_cn) {
 		fg->bp.fastchg_curr_ma = 2300;
 	}
 #ifdef CONFIG_XIAOMI_TULIP

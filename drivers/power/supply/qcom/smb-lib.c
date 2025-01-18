@@ -20,6 +20,7 @@
 #include "fg-core-xiaomi.h"
 
 extern int hwc_check_global;
+extern int hwc_check_cn;
 #ifdef CONFIG_XIAOMI_WHYRED
 #define LCT_JEITA_CCC_AUTO_ADJUST  1
 #else
