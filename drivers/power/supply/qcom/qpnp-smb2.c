@@ -43,6 +43,7 @@ int LctIsInCall = 0;
 int LctThermal =0;
 extern int hwc_check_india;
 extern int hwc_check_global;
+extern int hwc_check_cn;
 extern bool is_poweroff_charge;
 #endif
 
@@ -315,7 +316,7 @@ static int smb2_parse_dt(struct smb2 *chip)
 	chip->dt.no_pd = of_property_read_bool(node,
 						"qcom,pd-not-supported");
 
-	if (hwc_check_global) {
+	if (hwc_check_global || hwc_check_cn) {
 		chg->batt_profile_fcc_ua = 2300000;
 #ifdef CONFIG_XIAOMI_TULIP
 		if (is_poweroff_charge) {
