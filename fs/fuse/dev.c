@@ -489,8 +489,8 @@ static void request_wait_answer(struct fuse_conn *fc, struct fuse_req *req)
 	 * Wait half of freeze_timeout_msecs to avoid getting stuck.
 	 */
 	while (!test_bit(FR_FINISHED, &req->flags))
-		wait_event_freezable_timeout(req->waitq,
-			test_bit(FR_FINISHED, &req->flags), freeze_timeout_msecs / 2);
+		wait_event_freezable(req->waitq,
+				test_bit(FR_FINISHED, &req->flags));
 }
 
 static void __fuse_request_send(struct fuse_conn *fc, struct fuse_req *req)
@@ -1682,9 +1682,11 @@ static int fuse_notify_store(struct fuse_conn *fc, unsigned int size,
 
 		this_num = min_t(unsigned, num, PAGE_SIZE - offset);
 		err = fuse_copy_page(cs, &page, offset, this_num, 0);
-		if (!err && offset == 0 &&
-		    (this_num == PAGE_SIZE || file_size == end))
+		if (!PageUptodate(page) && !err && offset == 0 &&
+		    (this_num == PAGE_SIZE || file_size == end)) {
+			zero_user_segment(page, this_num, PAGE_SIZE);
 			SetPageUptodate(page);
+		}
 		unlock_page(page);
 		put_page(page);
 
@@ -2297,13 +2299,9 @@ static long fuse_dev_ioctl(struct file *file, unsigned int cmd,
 	int res;
 	int oldfd;
 	struct fuse_dev *fud = NULL;
-	struct fuse_passthrough_out pto;
 
-	if (_IOC_TYPE(cmd) != FUSE_DEV_IOC_MAGIC)
-		return -EINVAL;
-
-	switch (_IOC_NR(cmd)) {
-	case _IOC_NR(FUSE_DEV_IOC_CLONE):
+	switch (cmd) {
+	case FUSE_DEV_IOC_CLONE:
 		res = -EFAULT;
 		if (!get_user(oldfd, (__u32 __user *)arg)) {
 			struct file *old = fget(oldfd);
@@ -2328,15 +2326,13 @@ static long fuse_dev_ioctl(struct file *file, unsigned int cmd,
 			}
 		}
 		break;
-	case _IOC_NR(FUSE_DEV_IOC_PASSTHROUGH_OPEN):
+	case FUSE_DEV_IOC_PASSTHROUGH_OPEN:
 		res = -EFAULT;
-		if (!copy_from_user(&pto,
-				    (struct fuse_passthrough_out __user *)arg,
-				    sizeof(pto))) {
+		if (!get_user(oldfd, (__u32 __user *)arg)) {
 			res = -EINVAL;
 			fud = fuse_get_dev(file);
 			if (fud)
-				res = fuse_passthrough_open(fud, &pto);
+				res = fuse_passthrough_open(fud, oldfd);
 		}
 		break;
 	default:

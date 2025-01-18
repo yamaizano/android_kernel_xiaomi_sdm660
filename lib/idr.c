@@ -14,7 +14,7 @@
  * @max: The maximum ID to allocate (inclusive).
  * @gfp: Memory allocation flags.
  *
- * Allocates an unused ID in the range specified by @nextid and @max.
+ * Allocates an unused ID in the range specified by @start and @max.
  * Note that @max is inclusive whereas the @end parameter to idr_alloc()
  * is exclusive.  The new ID is assigned to @nextid before the pointer
  * is inserted into the IDR, so if @nextid points into the object pointed
@@ -503,7 +503,7 @@ void ida_free(struct ida *ida, unsigned int id)
 			goto delete;
 		xas_store(&xas, xa_mk_value(v));
 	} else {
-		if (!test_bit(bit, bitmap->bitmap))
+		if (!bitmap || !test_bit(bit, bitmap->bitmap))
 			goto err;
 		__clear_bit(bit, bitmap->bitmap);
 		xas_set_mark(&xas, XA_FREE_MARK);
