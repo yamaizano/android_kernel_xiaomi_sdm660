@@ -69,3 +69,4 @@
 #include "bouquet-panel.dtsi"
 #include "bouquet-pinctrl.dtsi"
 #include "bouquet-pm.dtsi"
+#include "../../sdm660-simple-thermal.dtsi"
