@@ -844,19 +844,19 @@
 
 	generic_bw_opp_table: generic-bw-opp-table {
 		compatible = "operating-points-v2";
-		BW_OPP_ENTRY( 100, 4); /*  381 MB/s */
-		BW_OPP_ENTRY( 150, 4); /*  572 MB/s */
-		BW_OPP_ENTRY( 200, 4); /*  762 MB/s */
-		BW_OPP_ENTRY( 300, 4); /* 1144 MB/s */
-		BW_OPP_ENTRY( 412, 4); /* 1571 MB/s */
-		BW_OPP_ENTRY( 547, 4); /* 2086 MB/s */
-		BW_OPP_ENTRY( 681, 4); /* 2597 MB/s */
-		BW_OPP_ENTRY( 768, 4); /* 2929 MB/s */
-		BW_OPP_ENTRY(1017, 4); /* 3879 MB/s */
-		BW_OPP_ENTRY(1296, 4); /* 4943 MB/s */
-		BW_OPP_ENTRY(1353, 4); /* 5163 MB/s */
-		BW_OPP_ENTRY(1555, 4); /* 5931 MB/s */
-		BW_OPP_ENTRY(1804, 4); /* 6881 MB/s */
+		BW_OPP_ENTRY( 100, 5); /*  457 MB/s */
+		BW_OPP_ENTRY( 150, 5); /*  686 MB/s */
+		BW_OPP_ENTRY( 200, 5); /*  914 MB/s */
+		BW_OPP_ENTRY( 300, 5); /* 1372 MB/s */
+		BW_OPP_ENTRY( 412, 5); /* 1885 MB/s */
+		BW_OPP_ENTRY( 547, 5); /* 2503 MB/s */
+		BW_OPP_ENTRY( 681, 5); /* 3116 MB/s */
+		BW_OPP_ENTRY( 768, 5); /* 3515 MB/s */
+		BW_OPP_ENTRY(1017, 5); /* 4655 MB/s */
+		BW_OPP_ENTRY(1296, 5); /* 5932 MB/s */
+		BW_OPP_ENTRY(1353, 5); /* 6196 MB/s */
+		BW_OPP_ENTRY(1555, 5); /* 7117 MB/s */
+		BW_OPP_ENTRY(1804, 5); /* 8257 MB/s */
 	};
 
 	 cpu_cpu_ddr_bw: qcom,cpu-cpu-ddr-bw {
