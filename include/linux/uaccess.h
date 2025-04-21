@@ -114,8 +114,8 @@ extern long notrace probe_kernel_write(void *dst, const void *src, size_t size);
 extern long notrace __probe_kernel_write(void *dst, const void *src, size_t size);
 
 extern long strncpy_from_unsafe(char *dst, const void *unsafe_addr, long count);
-long strncpy_from_user_nofault(char *dst, const void __user *unsafe_addr,
-		               long count);
+extern long strncpy_from_unsafe_user(char *dst, const void __user *unsafe_addr,
+				     long count);
 extern long strnlen_unsafe_user(const void __user *unsafe_addr, long count);
 
 /**
